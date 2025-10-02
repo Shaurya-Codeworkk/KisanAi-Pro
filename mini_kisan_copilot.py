@@ -69,17 +69,32 @@ def ask_groq_ai(prompt_key: str, system_prompt: str, user_prompt: str, is_json: 
         print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         return {} if is_json else f"Sorry, an error occurred while talking to the AI."
 
-# --- Live Crop Prices ---
+# In mini_kisan_copilot.py
+
 def get_live_crop_prices(crop_list: list):
     crops_string = ", ".join(crop_list)
+    # Ask for the price per QUINTAL (100 kg)
     prompt = f"""
-    Provide current average mandi prices in India (in Rs/kg) for the following crops: {crops_string}.
+    Provide current average mandi prices in India (in Rs/quintal) for the following crops: {crops_string}.
     Return ONLY a valid JSON object in the format: {{"crop1": price1, "crop2": price2, ...}}
-    For example: {{"rice": 45, "wheat": 36}}
+    For example: {{"rice": 4500, "wheat": 2350}}
     """
     system_prompt = "You are a data provider. Return only a valid JSON object."
-    prices = ask_groq_ai("live_prices", system_prompt, prompt, is_json=True)
-    return prices
+    prices_per_quintal = ask_groq_ai(f"live_prices_{'_'.join(crop_list)}", system_prompt, prompt, is_json=True)
+
+    prices_per_kg = {}
+    if prices_per_quintal:
+        for crop, price in prices_per_quintal.items():
+            # Divide by 100 to convert to per/kg
+            prices_per_kg[crop.lower()] = float(price) / 100
+
+    # Add defaults for any crops the AI missed
+    defaults = {"rice": 45.0, "wheat": 25.0, "cotton": 80.0}
+    for crop in crop_list:
+        if crop.lower() not in prices_per_kg:
+            prices_per_kg[crop.lower()] = defaults.get(crop.lower(), 'N/A')
+
+    return prices_per_kg
 
 # --- Crop Dynamic Details ---
 # In mini_kisan_copilot.py
@@ -178,4 +193,5 @@ if __name__ == "__main__":
         if query.lower() == "exit":
             break
         print(mini_copilot_response(query))
+
 
