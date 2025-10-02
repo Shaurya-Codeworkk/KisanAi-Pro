@@ -82,6 +82,8 @@ def get_live_crop_prices(crop_list: list):
     return prices
 
 # --- Crop Dynamic Details ---
+# In mini_kisan_copilot.py
+
 def get_crop_dynamic_details(crop_name: str):
     prompt = f"""
     You are an expert Indian agronomist.
@@ -95,6 +97,23 @@ def get_crop_dynamic_details(crop_name: str):
     """
     system_prompt = "You are an expert agronomist. Return only a valid JSON object."
     data = ask_groq_ai(f"crop_details_{crop_name}", system_prompt, prompt, is_json=True)
+
+    # --- THIS IS THE NEW PART ---
+    # Add default values to prevent "N/A"
+    defaults = {
+        "definition": f"{crop_name.title()} is a major crop in India with various agricultural uses.",
+        "soil": "Varies by region, but generally well-drained soil is preferred.",
+        "irrigation": "Requires regular watering, especially during dry seasons.",
+        "fertilizer": "A balanced NPK fertilizer is recommended.",
+        "pesticides": "Monitor for common pests and use appropriate treatments.",
+        "quick_tip": f"Ensure proper soil preparation before planting {crop_name} for best results."
+    }
+
+    # Fill in any missing keys with default values
+    for key in defaults:
+        if key not in data or not data[key]:
+            data[key] = defaults[key]
+
     return data
 
 # --- NEW FEATURE: Smart Crop Extractor ---
@@ -159,3 +178,4 @@ if __name__ == "__main__":
         if query.lower() == "exit":
             break
         print(mini_copilot_response(query))
+
