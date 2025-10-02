@@ -220,6 +220,24 @@ def get_crop_rotation_plan(current_crop, location):
     print("[AI Rotation Planner] Plan ready! ✅")
     return plan
 
+# Add this new function to your app.py file
+
+def get_grow_guide_details(crop_name: str):
+    """Gets the detailed grow guide info from the AI."""
+    print(f"[AI Grow Guide] Generating guide for {crop_name}...")
+    system_prompt = "You are an expert Indian agronomist providing a detailed grow guide. Return ONLY a valid JSON object."
+    user_prompt = f"""
+    Provide a detailed guide for growing '{crop_name}' in India.
+    Return ONLY a valid JSON object with the following keys:
+    - "description": A short, engaging summary of the crop.
+    - "season": The primary growing seasons (e.g., Kharif, Rabi) and ideal planting months.
+    - "growth_duration": Typical time from sowing to harvest in days.
+    - "irrigation_plan": A practical, brief irrigation schedule.
+    - "pesticide_usage": Key pests/diseases and recommended management practices.
+    """
+    guide_data = ask_groq_ai(f"grow_guide_{crop_name}", system_prompt, user_prompt)
+    return guide_data
+
 # --- Top 3 Recommendation Logic (No changes needed) ---
 def rank_top_3(crop_probs, live_prices, future_prices):
     transport_score = {"rice": 80, "wheat": 85, "cotton": 50, "jute": 60, "coffee": 40, "mango": 30, "pigeonpeas": 70}
@@ -354,3 +372,4 @@ if __name__ == "__main__":
                 save_results(final_data, top_crops)
         except Exception as e:
             print(f"❌ Manual input failed: {e}")
+
