@@ -2,7 +2,7 @@
 # To run this API:
 # 1. Install necessary packages: pip install fastapi uvicorn python-multipart joblib pandas numpy requests groq jinja2
 # 2. Run the server from your terminal: uvicorn api:app --reload
-
+from app import *
 import joblib
 import pandas as pd
 import numpy as np
@@ -168,5 +168,6 @@ def get_grow_guide(crop_name: str):
     except Exception as e:
         print(f"An error occurred in /grow_guide: {e}")
         raise HTTPException(status_code=500, detail=f"An error occurred while generating the grow guide.")
+
 
 
