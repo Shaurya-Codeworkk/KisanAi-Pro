@@ -146,9 +146,9 @@ def get_grow_guide_endpoint(crop_name: str):
     Provides a detailed growing guide for a specific crop using an AI.
     """
     try:
-        # This calls the get_crop_rotation_plan, seems like a bug, should be get_grow_guide_details
-        # Let's assume you have a function in app.py for this. For now, let's call get_crop_dynamic_details
-        guide_data = get_grow_guide_details(crop_name) # Using a function from your app.py
+        # This line now calls the correct new function from app.py
+        guide_data = get_grow_guide_details(crop_name)
+
         if not guide_data:
             raise HTTPException(status_code=404, detail="Could not generate a guide for this crop.")
         return guide_data
@@ -196,4 +196,5 @@ def process_recommendations(final_data: Dict, location: str) -> Dict:
         },
         "smart_rotation_plan": rotation_plan
     }
+
 
