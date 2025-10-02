@@ -930,18 +930,21 @@
     }
     
     function addMessageAgent(text, sender, isTyping = false) {
-        const container = document.getElementById('chatMessagesAgent');
-        const div = document.createElement('div');
-        div.className = `message ${sender}-message`;
-        if(isTyping) {
-            div.classList.add('typing');
-            div.innerHTML = `<div class="flex gap-1 items-center"><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div></div>`;
-        } else {
-            div.textContent = text;
-        }
-        container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
-    }
+        const container = document.getElementById('chatMessagesAgent');
+        const div = document.createElement('div');
+        div.className = `message ${sender}-message`;
+        if(isTyping) {
+            div.classList.add('typing');
+            div.innerHTML = `<div class="flex gap-1 items-center"><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div></div>`;
+        } else {
+            // --- THIS IS THE UPGRADED PART ---
+            // It correctly handles line breaks and bold text.
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            div.innerHTML = formattedText;
+        }
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
 
     window.handleKeyPressAgent = function(e) { if (e.key === "Enter") sendMessageAgent(); }
 
