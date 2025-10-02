@@ -1,5 +1,5 @@
 fastapi
-uvicorn[standard]
+uvicorn
 joblib
 pandas
 numpy
@@ -7,3 +7,4 @@ requests
 groq
 python-multipart
 scikit-learn
+jinja2
