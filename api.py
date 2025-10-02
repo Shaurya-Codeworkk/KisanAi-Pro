@@ -122,33 +122,23 @@ def predict_with_manual_input(data: ManualInput):
     except Exception as e:
         raise HTTPException(500, f"An internal server error occurred: {e}")
 
+# In api.py, replace the old mini_chat_endpoint with this new one
+
 @app.post("/mini_chat", tags=["AI Assistant"])
 def mini_chat_endpoint(data: MiniChatInput):
     try:
-        # Split query by commas to detect multiple crops (if user enters multiple)
-        crops = [c.strip() for c in data.query.split(",")]
-        responses = {}
-        
-        for crop in crops:
-            prompt = f"""
-            As an expert Indian agronomist, answer concisely in 2-3 sentences.
-            For a specific crop, give its ideal growing season and one important tip.
-            Crop: "{crop}"
-            """
-            answer = groq_call_with_cache(f"mini_chat_{crop}", prompt, is_json=False)
-            responses[crop] = {
-                "human_readable": answer,
-                "structured": {
-                    "crop": crop,
-                    "summary": answer
-                }
-            }
-        
-        return {"responses": responses}
+        # This is your original code, it stays the same
+        prompt = f'As an expert Indian agronomist, answer concisely in 2-3 sentences. For a specific crop, give its ideal growing season and one important tip. User question: "{data.query}"'
+        answer = groq_call_with_cache(f"mini_chat_{data.query}", prompt, is_json=False)
+        return {"response": answer}
     except Exception as e:
-        raise HTTPException(500, f"Error processing chat message: {e}")
-
-
+        # THIS IS THE NEW PART - It will print the real error to your logs
+        print(f"!!!!!!!!!! CRITICAL ERROR IN /mini_chat !!!!!!!!!!!")
+        print(f"Error Type: {type(e).__name__}")
+        print(f"Error Details: {e}")
+        print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        # The user will still see a generic error, but we will see the real one in the logs.
+        raise HTTPException(500, "Internal server error. Check logs for details.")
 @app.get("/grow_guide/{crop_name}", tags=["Grow Guide"])
 def get_grow_guide(crop_name: str):
     """Provides a detailed growing guide for a specific crop using an AI."""
@@ -169,6 +159,7 @@ def get_grow_guide(crop_name: str):
     except Exception as e:
         print(f"An error occurred in /grow_guide: {e}")
         raise HTTPException(status_code=500, detail=f"An error occurred while generating the grow guide.")
+
 
 
 
