@@ -2,7 +2,7 @@
 # To run this API:
 # 1. Install necessary packages: pip install fastapi uvicorn python-multipart joblib pandas numpy requests groq jinja2
 # 2. Run the server from your terminal: uvicorn api:app --reload
-from app import *
+
 import joblib
 import pandas as pd
 import numpy as np
@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any, Tuple
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from app import *
 
 # --- Pydantic Models for Request & Response ---
 class AgentInput(BaseModel):
