@@ -157,18 +157,38 @@ def fill_missing_values_ai(details):
     print("[AI Estimate] Predicted NPK/pH/rainfall: ", {k: details[k] for k in ['N','P','K','pH','rainfall']})
     return details
 
-# --- Prediction Function (No changes needed here) ---
 def make_prediction(input_data, top_n=5):
+    """
+    Makes a prediction and applies smoothing to the probabilities for better visualization.
+    """
     df = pd.DataFrame([input_data], columns=model.feature_names_in_)
     scaled_features = scaler.transform(df)
-    probs = model.predict_proba(scaled_features)[0]
-    top_indices = np.argsort(probs)[::-1][:top_n]
+    
+    # Get the original, "sharp" probabilities from your model
+    original_probs = model.predict_proba(scaled_features)[0]
+    
+    # --- NEW: Apply smoothing to make percentages less extreme ---
+    # We take the square root, which lifts smaller values and lowers the highest one
+    smoothed_probs = np.sqrt(original_probs)
+    
+    # The probabilities no longer add up to 1, so we must re-normalize them
+    total_smoothed = np.sum(smoothed_probs)
+    if total_smoothed == 0:
+        # Avoid division by zero if all probabilities are somehow zero
+        normalized_probs = original_probs
+    else:
+        normalized_probs = smoothed_probs / total_smoothed
+    
+    # Now, use the NEW "normalized_probs" for ranking and display
+    top_indices = np.argsort(normalized_probs)[::-1][:top_n]
+    
     results = []
     for idx in top_indices:
         crop = encoder.inverse_transform([idx])[0].lower()
-        results.append((crop, round(probs[idx]*100, 2)))
+        # The result will now show the new, smoother percentage
+        results.append((crop, round(normalized_probs[idx] * 100, 2)))
+        
     return results
-
 # --- Fetch Live Crop Prices ---
 def get_live_crop_prices():
     print("[Market Research] Fetching live crop prices...")
@@ -379,5 +399,6 @@ if __name__ == "__main__":
                 save_results(final_data, top_crops)
         except Exception as e:
             print(f"❌ Manual input failed: {e}")
+
 
 
