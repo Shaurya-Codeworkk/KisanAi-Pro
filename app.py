@@ -184,15 +184,20 @@ def get_live_crop_prices():
     return {k.lower(): float(v) for k, v in prices.items()}
 
 # --- AI FUTURE PRICE PREDICTION ---
+# In app.py, replace the old get_future_price_ai function
+
 def get_future_price_ai(crop_name, location):
     print(f"[AI Price Predictor] Predicting future price for '{crop_name}' in {location}...")
-    system_prompt = "You are an expert Indian market analyst. Your task is to predict the approximate price (in Rs/kg) of a crop in a specific region after a typical 6-month harvest period, considering seasonal trends. Return ONLY a valid JSON object with the key 'future_price' and a numeric value."
-    user_prompt = f"Predict the 6-month future price of '{crop_name}' in the '{location}' region."
+    system_prompt = "You are an expert Indian market analyst. Predict the approximate price (in Rs/quintal) of a crop in a specific region after a typical 6-month harvest period. Return ONLY a valid JSON object with the key 'future_price' and a numeric value."
+    user_prompt = f"Predict the 6-month future price (in Rs/quintal) of '{crop_name}' in the '{location}' region."
 
-    prediction = ask_groq_ai(f"future_price_{crop_name}_{location}", system_prompt, user_prompt)
+    prediction = ask_groq_ai(f"future_price_quintal_{crop_name}_{location}", system_prompt, user_prompt)
+
+    price_per_quintal = float(prediction.get("future_price", -1.0))
+
+    # Convert from quintal to kg, or return -1.0 if it fails
+    return price_per_quintal / 100 if price_per_quintal > 0 else -1.0
     
-    return float(prediction.get("future_price", -1.0)) # -1 if it fails
-
 # --- AI Dynamic Crop Details Fetcher (Not used in main workflow but kept as a feature) ---
 def get_crop_dynamic_details(crop_name):
     print(f"[AI Details] Fetching details for {crop_name}...")
@@ -221,6 +226,8 @@ def get_crop_rotation_plan(current_crop, location):
     return plan
 
 # Add this new function to your app.py file
+
+# Add this entire new function anywhere in your app.py file
 
 def get_grow_guide_details(crop_name: str):
     """Gets the detailed grow guide info from the AI."""
@@ -372,4 +379,5 @@ if __name__ == "__main__":
                 save_results(final_data, top_crops)
         except Exception as e:
             print(f"❌ Manual input failed: {e}")
+
 
